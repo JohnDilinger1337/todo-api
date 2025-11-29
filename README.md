@@ -20,13 +20,28 @@ A simple API-based todo application built with Go that organizes tasks into mult
 
 ### Installation
 
-To use the Taskfile for running common commands, you need to install Task. If you're using Windows, you can install it using Scoop:
+#### 1. Install Scoop (Windows)
+
+If you don't have Scoop installed, follow these steps:
+
+```bash
+# Open PowerShell and run:
+iwr -useb get.scoop.sh | iex
+```
+
+For more details, visit [Scoop's installation guide](https://scoop.sh/)
+
+#### 2. Install Task via Scoop
+
+Once Scoop is installed, you can install Task:
 
 ```bash
 scoop install task
 ```
 
 For other operating systems, visit [Task's installation guide](https://taskfile.dev/installation/)
+
+#### 3. Install Docker and Docker Compose
 
 To run Docker and Docker Compose, ensure Docker Desktop is installed on your system. You can download it from [Docker's official website](https://www.docker.com/)
 

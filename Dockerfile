@@ -1,5 +1,5 @@
 # 1. Use official Go image
-FROM golang:1.21.6-alpine3.20
+FROM golang:1.21.6-alpine
 
 # 2. Enable CGO (needed for go-sqlite3)
 ENV CGO_ENABLED=1 \
