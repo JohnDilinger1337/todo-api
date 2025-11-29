@@ -2,6 +2,7 @@ package main
 
 import (
 	"main/config"
+	"main/database"
 	"main/docs"
 
 	"github.com/gin-gonic/gin"
@@ -19,6 +20,11 @@ func main() {
 	docs.SwaggerInfo.Host = "localhost:" + cfg.Port
 	docs.SwaggerInfo.BasePath = "/api/v1"
 	docs.SwaggerInfo.Schemes = []string{"http"}
+
+	db := database.Connect(cfg)
+	if db != nil {
+		panic(db)
+	}
 
 	server := gin.Default()
 

@@ -9,6 +9,7 @@ import (
 type Config struct {
 	Port    string
 	GinMode string
+	DBPath  string
 }
 
 func LoadConfig() *Config {
@@ -25,7 +26,11 @@ func LoadConfig() *Config {
 	if ginMode == "" {
 		ginMode = "debug"
 	}
+	dbPath := os.Getenv("DB_PATH")
+	if dbPath == "" {
+		dbPath = "data.sqlite"
+	}
 
-	return &Config{Port: port, GinMode: ginMode}
+	return &Config{Port: port, GinMode: ginMode, DBPath: dbPath}
 
 }
