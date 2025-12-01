@@ -7,9 +7,12 @@ import (
 )
 
 type Config struct {
-	Port    string
-	GinMode string
-	DBPath  string
+	AppName      string
+	Port         string
+	GinMode      string
+	DBPath       string
+	JWTSecret    string
+	JWTExpiresAt string
 }
 
 func LoadConfig() *Config {
@@ -30,7 +33,19 @@ func LoadConfig() *Config {
 	if dbPath == "" {
 		dbPath = "data.sqlite"
 	}
+	jwtSecret := os.Getenv("JWT_SECRET")
+	if jwtSecret == "" {
+		jwtSecret = "supersecretkey"
+	}
+	jwtExpiresAtStr := os.Getenv("JWT_EXPIRES_AT")
+	if jwtExpiresAtStr == "" {
+		jwtExpiresAtStr = "72h"
+	}
+	appName := os.Getenv("APP_NAME")
+	if appName == "" {
+		appName = "Todo API"
+	}
 
-	return &Config{Port: port, GinMode: ginMode, DBPath: dbPath}
+	return &Config{Port: port, GinMode: ginMode, DBPath: dbPath, JWTSecret: jwtSecret, JWTExpiresAt: jwtExpiresAtStr, AppName: appName}
 
 }
