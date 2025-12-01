@@ -9,7 +9,7 @@ tasks:
   dev:
     desc: "Run hot reload inside Docker"
     cmds:
-      - docker-compose run --rm app air
+      - docker-compose run --rm --service-ports app air -build.poll true -build.poll_interval 500ms
 
   build:
     desc: "Build Docker image"

@@ -1,0 +1,30 @@
+root = "."
+tmp_dir = "tmp"
+
+[build]
+  # Build into a tmp binary to avoid clobbering the image binary and to let
+  # `go build` perform incremental compilation of changed packages.
+  cmd = "go build -v -o ./tmp/main ."
+  # Runner will execute this binary (relative to project root)
+  bin = "./tmp/main"
+  include_ext = ["go", "tpl", "tmpl", "html", "css", "js"]
+  exclude_dir = ["vendor", "tmp", "assets"]
+  include = ["."]
+  exclude = []
+  # When enabled, air will skip rebuilds if files are unchanged (helps avoid
+  # unnecessary work when editors touch files but don't change content).
+  exclude_unchanged = "true"
+  # Enable polling to detect file changes on host mounts where inotify events
+  # may not propagate (e.g., Windows -> Docker for Desktop).
+  poll = "true"
+  poll_interval = "500ms"
+  delay = "100ms"
+
+[log]
+  time = true
+
+[colors]
+  main = "yellow"
+  watcher = "cyan"
+  build = "green"
+  runner = "magenta"
