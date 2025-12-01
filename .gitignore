@@ -42,5 +42,4 @@ logs/
 tmp/
 
 # Database files
-database/
 *.sqlite

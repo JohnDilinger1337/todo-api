@@ -1,8 +1,8 @@
 package main
 
 import (
+	"main/bootstrap"
 	"main/config"
-	"main/database"
 	"main/docs"
 
 	"github.com/gin-gonic/gin"
@@ -20,9 +20,9 @@ func main() {
 	docs.SwaggerInfo.Host = "localhost:" + cfg.Port
 	docs.SwaggerInfo.BasePath = "/api/v1"
 	docs.SwaggerInfo.Schemes = []string{"http"}
+	db, err := bootstrap.InitializeApp(cfg)
 
-	db := database.Connect(cfg)
-	if db != nil {
+	if err != nil {
 		panic(db)
 	}
 
@@ -31,12 +31,6 @@ func main() {
 	if cfg.GinMode != "release" {
 		server.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	}
-
-	server.GET("/ping", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "pong",
-		})
-	})
 
 	server.Run(":" + cfg.Port)
 
