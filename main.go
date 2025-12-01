@@ -8,10 +8,32 @@ import (
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+
+	"main/api"
+	"main/controller"
+	"main/repository"
+	"main/service"
+)
+
+var (
+	userRepo *repository.UserRepository
+	jwtSvc   *service.JWTService
+	authSvc  *service.AuthService
+
+	authCtrl *controller.AuthController
+	authAPI  *api.AuthAPI
 )
 
 func main() {
 	cfg := config.LoadConfig()
+	db, err := bootstrap.InitializeApp(cfg)
+
+	userRepo = repository.NewUserRepository(db)
+	jwtSvc = service.NewJWTService(cfg.JWTSecret, cfg.AppName, cfg.JWTExpiresAt)
+	authSvc = service.NewAuthService(userRepo, jwtSvc)
+	authCtrl = controller.NewAuthController(authSvc)
+	authAPI = api.NewAuthAPI(*authCtrl)
+
 	gin.SetMode(cfg.GinMode)
 
 	docs.SwaggerInfo.Title = "Todo API"
@@ -20,7 +42,6 @@ func main() {
 	docs.SwaggerInfo.Host = "localhost:" + cfg.Port
 	docs.SwaggerInfo.BasePath = "/api/v1"
 	docs.SwaggerInfo.Schemes = []string{"http"}
-	db, err := bootstrap.InitializeApp(cfg)
 
 	if err != nil {
 		panic(db)
@@ -30,6 +51,15 @@ func main() {
 
 	if cfg.GinMode != "release" {
 		server.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	}
+
+	apiRoutes := server.Group(docs.SwaggerInfo.BasePath)
+	{
+		auth := apiRoutes.Group("/auth")
+		{
+			auth.POST("/register", authAPI.RegisterRoute)
+			auth.POST("/login", authAPI.LoginRoute)
+		}
 	}
 
 	server.Run(":" + cfg.Port)

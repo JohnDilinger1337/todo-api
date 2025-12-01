@@ -1,13 +1,13 @@
 package database
 
 import (
-	"main/database/models"
+	"main/database/model"
 
 	"gorm.io/gorm"
 )
 
 var modelsList = []interface{}{
-	&models.User{},
+	&model.User{},
 }
 
 func Migrate(db *gorm.DB) error {
