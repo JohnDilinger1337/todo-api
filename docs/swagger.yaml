@@ -1,9 +1,94 @@
-basePath: /
-host: localhost:8080
+definitions:
+  controller.ErrorResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  controller.LoginInput:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  controller.LoginResponse:
+    properties:
+      token:
+        type: string
+    type: object
+  controller.RegisterInput:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  controller.RegisterResponse:
+    properties:
+      email:
+        type: string
+      id:
+        type: integer
+      role:
+        type: string
+      username:
+        type: string
+    type: object
 info:
   contact: {}
-  description: This is a sample Swagger API.
-  title: My API
-  version: "1.0"
-paths: {}
+paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Login a user with username and password
+      parameters:
+      - description: User login info
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/controller.LoginInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.LoginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controller.ErrorResponse'
+      summary: login a user
+      tags:
+      - Auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Register a new user with username, email, and password
+      parameters:
+      - description: User registration info
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/controller.RegisterInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/controller.RegisterResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controller.ErrorResponse'
+      summary: Register a new user
+      tags:
+      - Auth
 swagger: "2.0"

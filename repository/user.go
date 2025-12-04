@@ -2,6 +2,7 @@ package repository
 
 import (
 	"errors"
+	"fmt"
 	"main/database/model"
 
 	"gorm.io/gorm"
@@ -19,9 +20,9 @@ func NewUserRepository(db *gorm.DB) *UserRepository {
 }
 
 func (r *UserRepository) CreateUser(input *model.User) (*model.User, error) {
-
 	var registered model.User
 	if err := r.DB.Where("username = ? OR email = ?", input.Username, input.Email).First(&registered).Error; err == nil {
+		fmt.Println("User already exists:", registered.Username)
 		return nil, ErrUserExists
 	}
 

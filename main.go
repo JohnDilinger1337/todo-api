@@ -32,7 +32,7 @@ func main() {
 	jwtSvc = service.NewJWTService(cfg.JWTSecret, cfg.AppName, cfg.JWTExpiresAt)
 	authSvc = service.NewAuthService(userRepo, jwtSvc)
 	authCtrl = controller.NewAuthController(authSvc)
-	authAPI = api.NewAuthAPI(*authCtrl)
+	authAPI = api.NewAuthAPI(authCtrl)
 
 	gin.SetMode(cfg.GinMode)
 

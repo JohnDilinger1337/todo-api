@@ -16,16 +16,20 @@ type RegisterInput struct {
 	Password string `json:"password"`
 }
 
+type RegisterResponse struct {
+	ID       uint   `json:"id"`
+	Username string `json:"username"`
+	Email    string `json:"email"`
+	Role     string `json:"role"`
+}
+
 type LoginInput struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 }
 
-type UserResponse struct {
-	ID       uint   `json:"id"`
-	Username string `json:"username"`
-	Email    string `json:"email"`
-	Role     string `json:"role"`
+type LoginResponse struct {
+	Token string `json:"token"`
 }
 
 type ErrorResponse struct {
@@ -38,9 +42,15 @@ func NewAuthController(authService *services.AuthService) *AuthController {
 
 func (c *AuthController) Register(ctx *gin.Context) (string, error) {
 	var input RegisterInput
-	err := ctx.ShouldBindJSON(&input)
+	if err := ctx.ShouldBindJSON(&input); err != nil {
+		return "", err
+	}
 
 	user, err := c.AuthService.Register(input.Username, input.Email, input.Password)
+
+	if err != nil {
+		return "", err
+	}
 
 	token, err := c.AuthService.Login(user.Username, user.Password)
 
@@ -53,12 +63,14 @@ func (c *AuthController) Register(ctx *gin.Context) (string, error) {
 
 func (c *AuthController) Login(ctx *gin.Context) (string, error) {
 	var input LoginInput
-	err := ctx.ShouldBindJSON(&input)
+	if err := ctx.ShouldBindJSON(&input); err != nil {
+		return "", err
+	}
 
 	token, err := c.AuthService.Login(input.Username, input.Password)
 	if err != nil {
 		return "", err
 	}
 
-	return token, nil
+	return token, err
 }
