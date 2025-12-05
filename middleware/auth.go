@@ -8,22 +8,39 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func JWTMiddleware(jwtService *service.JWTService) gin.HandlerFunc {
-    return func(c *gin.Context) {
-      tokenString, _ := c.Cookie("token");
-			 if tokenString == "" {
-        c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
-        return
-      }
+type AuthUser struct {
+	ID    uint   `json:"id"`
+	Email string `json:"email"`
+	Role  string `json:"role"`
+}
 
-			token, err := jwtService.ValidateToken(tokenString)
-			 if err != nil {
-				c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
-				return
-			}
-			
-			claims := token.Claims.(jwt.MapClaims)
-			c.Set("claims", claims)
-			c.Next()
-    }
+func JWTMiddleware(jwtService *service.JWTService) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		tokenString, err := c.Cookie("token")
+		if err != nil || tokenString == "" {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Missing token"})
+			return
+		}
+
+		token, err := jwtService.ValidateToken(tokenString)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid or expired token"})
+			return
+		}
+
+		claims, ok := token.Claims.(jwt.MapClaims)
+		if !ok {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Cannot parse token"})
+			return
+		}
+
+		authUser := AuthUser{
+			ID:    uint(claims["user_id"].(float64)),
+			Email: claims["email"].(string),
+			Role:  claims["role"].(string),
+		}
+
+		c.Set("authUser", authUser)
+		c.Next()
+	}
 }
