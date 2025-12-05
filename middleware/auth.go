@@ -9,9 +9,8 @@ import (
 )
 
 type AuthUser struct {
-	ID    uint   `json:"id"`
-	Email string `json:"email"`
-	Role  string `json:"role"`
+	ID      uint `json:"id"`
+	IsAdmin bool `json:"is_admin"`
 }
 
 func JWTMiddleware(jwtService *service.JWTService) gin.HandlerFunc {
@@ -35,9 +34,8 @@ func JWTMiddleware(jwtService *service.JWTService) gin.HandlerFunc {
 		}
 
 		authUser := AuthUser{
-			ID:    uint(claims["user_id"].(float64)),
-			Email: claims["email"].(string),
-			Role:  claims["role"].(string),
+			ID:      uint(claims["user_id"].(float64)),
+			IsAdmin: claims["is_admin"].(bool),
 		}
 
 		c.Set("authUser", authUser)

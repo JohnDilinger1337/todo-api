@@ -1,16 +1,21 @@
 package utils
 
 import (
+	"errors"
 	"main/middleware"
 
 	"github.com/gin-gonic/gin"
 )
 
-func ReqUser(c *gin.Context) middleware.AuthUser {
+func ReqUser(c *gin.Context) (middleware.AuthUser, error) {
 	userAny, exists := c.Get("user")
 	if !exists {
-		return middleware.AuthUser{}
+		return middleware.AuthUser{}, errors.New("user not found")
 	}
-	user := userAny.(middleware.AuthUser)
-	return user
+
+	user, ok := userAny.(middleware.AuthUser)
+	if !ok {
+		return middleware.AuthUser{}, errors.New("invalid user type")
+	}
+	return user, nil
 }
