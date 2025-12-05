@@ -1,32 +1,22 @@
 package controller
 
 import (
-	services "main/service"
+	"main/dto"
+	"main/service"
 
 	"github.com/gin-gonic/gin"
 )
 
 type AuthController struct {
-	AuthService *services.AuthService
+	AuthService *service.AuthService
 }
 
-type RegisterInput struct {
-	Username string `json:"username"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
-}
-
-type LoginInput struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
-}
-
-func NewAuthController(authService *services.AuthService) *AuthController {
+func NewAuthController(authService *service.AuthService) *AuthController {
 	return &AuthController{AuthService: authService}
 }
 
 func (c *AuthController) Register(ctx *gin.Context) error {
-	var input RegisterInput
+	var input dto.RegisterInput
 	if err := ctx.ShouldBindJSON(&input); err != nil {
 		return err
 	}
@@ -43,7 +33,7 @@ func (c *AuthController) Register(ctx *gin.Context) error {
 }
 
 func (c *AuthController) Login(ctx *gin.Context) error {
-	var input LoginInput
+	var input dto.LoginInput
 	if err := ctx.ShouldBindJSON(&input); err != nil {
 		return err
 	}

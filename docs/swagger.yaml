@@ -1,22 +1,18 @@
 definitions:
-  controller.ErrorResponse:
+  dto.ErrorResponse:
     properties:
       message:
+        example: Something went wrong
         type: string
     type: object
-  controller.LoginInput:
+  dto.LoginInput:
     properties:
       password:
         type: string
       username:
         type: string
     type: object
-  controller.LoginResponse:
-    properties:
-      token:
-        type: string
-    type: object
-  controller.RegisterInput:
+  dto.RegisterInput:
     properties:
       email:
         type: string
@@ -25,15 +21,10 @@ definitions:
       username:
         type: string
     type: object
-  controller.RegisterResponse:
+  dto.SuccessMessageResponse:
     properties:
-      email:
-        type: string
-      id:
-        type: integer
-      role:
-        type: string
-      username:
+      message:
+        example: OK
         type: string
     type: object
 info:
@@ -50,18 +41,18 @@ paths:
         name: user
         required: true
         schema:
-          $ref: '#/definitions/controller.LoginInput'
+          $ref: '#/definitions/dto.LoginInput'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/controller.LoginResponse'
+            $ref: '#/definitions/dto.SuccessMessageResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/controller.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
       summary: login a user
       tags:
       - Auth
@@ -76,18 +67,18 @@ paths:
         name: user
         required: true
         schema:
-          $ref: '#/definitions/controller.RegisterInput'
+          $ref: '#/definitions/dto.RegisterInput'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/controller.RegisterResponse'
+            $ref: '#/definitions/dto.SuccessMessageResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/controller.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
       summary: Register a new user
       tags:
       - Auth

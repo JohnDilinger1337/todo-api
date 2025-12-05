@@ -1,11 +1,11 @@
 package service
 
 import (
-	"errors"
 	"time"
 
 	"main/config"
 	"main/database/model"
+	domainErr "main/domain/error"
 	"main/repository"
 
 	"github.com/gin-gonic/gin"
@@ -46,21 +46,21 @@ func (s *AuthService) Register(username, email, password string) (*model.User, e
 func (s *AuthService) Login(username, password string, c *gin.Context) error {
 	var user model.User
 	if err := s.UserRepo.DB.Where("username = ?", username).First(&user).Error; err != nil {
-		return errors.New("user not found")
+		return domainErr.New(domainErr.ErrUserNotFoundCode)
 	}
 
 	if !user.CheckPassword(password) {
-		return errors.New("invalid password")
+		return domainErr.New(domainErr.ErrInvalidPasswordCode)
 	}
 
 	token, err := s.JWTService.GenerateToken(user.ID, user.IsAdmin())
 	if err != nil {
-		return err
+		return domainErr.New(domainErr.ErrTokenGenerationCode)
 	}
 
 	duration, err := time.ParseDuration(s.Cfg.JWTExpiresAt)
 	if err != nil {
-		return err
+		return domainErr.New(domainErr.ErrOther)
 	}
 
 	c.SetCookie(

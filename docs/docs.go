@@ -35,7 +35,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/controller.LoginInput"
+                            "$ref": "#/definitions/dto.LoginInput"
                         }
                     }
                 ],
@@ -43,13 +43,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/controller.LoginResponse"
+                            "$ref": "#/definitions/dto.SuccessMessageResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/controller.ErrorResponse"
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     }
                 }
@@ -75,7 +75,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/controller.RegisterInput"
+                            "$ref": "#/definitions/dto.RegisterInput"
                         }
                     }
                 ],
@@ -83,13 +83,13 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/controller.RegisterResponse"
+                            "$ref": "#/definitions/dto.SuccessMessageResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/controller.ErrorResponse"
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     }
                 }
@@ -97,15 +97,16 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "controller.ErrorResponse": {
+        "dto.ErrorResponse": {
             "type": "object",
             "properties": {
                 "message": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Something went wrong"
                 }
             }
         },
-        "controller.LoginInput": {
+        "dto.LoginInput": {
             "type": "object",
             "properties": {
                 "password": {
@@ -116,15 +117,7 @@ const docTemplate = `{
                 }
             }
         },
-        "controller.LoginResponse": {
-            "type": "object",
-            "properties": {
-                "token": {
-                    "type": "string"
-                }
-            }
-        },
-        "controller.RegisterInput": {
+        "dto.RegisterInput": {
             "type": "object",
             "properties": {
                 "email": {
@@ -138,20 +131,12 @@ const docTemplate = `{
                 }
             }
         },
-        "controller.RegisterResponse": {
+        "dto.SuccessMessageResponse": {
             "type": "object",
             "properties": {
-                "email": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "role": {
-                    "type": "string"
-                },
-                "username": {
-                    "type": "string"
+                "message": {
+                    "type": "string",
+                    "example": "OK"
                 }
             }
         }

@@ -2,18 +2,12 @@ package api
 
 import (
 	"main/controller"
+	domainErr "main/domain/error"
+	"main/dto"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
-
-var ErrorUnauthorized = gin.H{"message": "Something went wrong while authenticating user!"}
-var ErrorForbidden = gin.H{"message": "forbidden"}
-var ErrorBadRequest = gin.H{"message": "Something went wrong while processing your request!"}
-var ErrorUserAlreadyLoggedIn = gin.H{"message": "user already logged in!"}
-
-var ResponseLoggedIn = gin.H{"message": "Logged in successfully"}
-var ResponseRegistered = gin.H{"message": "Registered successfully! You're now logged in."}
 
 type AuthAPI struct {
 	authController *controller.AuthController
@@ -29,18 +23,18 @@ func NewAuthAPI(authController *controller.AuthController) *AuthAPI {
 // @Tags Auth
 // @Accept json
 // @Produce json
-// @Param user body controller.RegisterInput true "User registration info"
-// @Success 201 {object} ResponseRegistered
-// @Failure 400 {object} ErrorBadRequest
+// @Param user body dto.RegisterInput true "User registration info"
+// @Success 201 {object} dto.SuccessMessageResponse
+// @Failure 400 {object} dto.ErrorResponse
 // @Router /auth/register [post]
 func (api *AuthAPI) RegisterRoute(ctx *gin.Context) {
 	err := api.authController.Register(ctx)
 
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, ErrorBadRequest)
+		ctx.JSON(http.StatusBadRequest, dto.ErrorResponse{Message: dto.MsgBadRequest})
 		return
 	}
-	ctx.JSON(http.StatusCreated, ResponseRegistered)
+	ctx.JSON(http.StatusCreated, dto.SuccessMessageResponse{Message: dto.MsgRegistered})
 }
 
 // LoginRoute godoc
@@ -49,22 +43,31 @@ func (api *AuthAPI) RegisterRoute(ctx *gin.Context) {
 // @Tags Auth
 // @Accept json
 // @Produce json
-// @Param user body controller.LoginInput true "User login info"
-// @Success 200 {object} ResponseLoggedIn
-// @Failure 400 {object} ErrorUnauthorized
+// @Param user body dto.LoginInput true "User login info"
+// @Success 200 {object} dto.SuccessMessageResponse
+// @Failure 400 {object} dto.ErrorResponse
 // @Router /auth/login [post]
 func (api *AuthAPI) LoginRoute(ctx *gin.Context) {
 	cookie, _ := ctx.Cookie("token")
 	if cookie != "" {
-		ctx.JSON(http.StatusBadRequest, ErrorUserAlreadyLoggedIn)
+		ctx.JSON(http.StatusBadRequest, dto.ErrorResponse{Message: dto.MsgUserAlreadyLoggedIn})
 		return
 	}
 
 	err := api.authController.Login(ctx)
 	if err != nil {
-		ctx.JSON(http.StatusUnauthorized, ErrorUnauthorized)
+		if e, ok := err.(*domainErr.DomainError); ok {
+			switch e.Code {
+			case domainErr.ErrUserNotFoundCode:
+				ctx.JSON(http.StatusUnauthorized, dto.ErrorResponse{Message: dto.MsgUnauthorized})
+				return
+			case domainErr.ErrInvalidPasswordCode:
+				ctx.JSON(http.StatusUnauthorized, dto.ErrorResponse{Message: dto.MsgInvalidPassword})
+				return
+			}
+		}
 		return
 	}
 	// Print Set-Cookie header to verify cookie is set in response
-	ctx.JSON(http.StatusOK, ResponseLoggedIn)
+	ctx.JSON(http.StatusOK, dto.SuccessMessageResponse{Message: dto.MsgLoggedIn})
 }
