@@ -6,6 +6,8 @@ import (
 	"main/config"
 	"main/controller"
 	"main/docs"
+
+	"main/middleware"
 	"main/repository"
 	"main/service"
 
@@ -47,6 +49,8 @@ func main() {
 	}
 
 	server := gin.Default()
+
+	server.Use(middleware.JWTMiddleware(jwtSvc))
 
 	if cfg.GinMode != "release" {
 		server.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

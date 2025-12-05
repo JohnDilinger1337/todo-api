@@ -12,13 +12,14 @@ const (
 )
 
 type User struct {
-	ID        uint      `gorm:"primaryKey" json:"id"`
-	Username  string    `gorm:"unique;not null" json:"username"`
-	Email     string    `gorm:"unique;not null" json:"email"`
-	Password  string    `gorm:"not null" json:"-"`
-	Role      string    `gorm:"not null;default:'user'" json:"role"`
-	CreatedAt time.Time `json:"created_At"`
-	UpdatedAt time.Time `json:"updatedAt"`
+	ID        uint       `gorm:"primaryKey" json:"id"`
+	Username  string     `gorm:"unique;not null" json:"username"`
+	Email     string     `gorm:"unique;not null" json:"email"`
+	Password  string     `gorm:"not null" json:"-"`
+	Role      string     `gorm:"not null;default:'user'" json:"role"`
+	TodoItems []TodoItem `gorm:"foreignKey:UserID" json:"todo_items"`
+	CreatedAt time.Time  `json:"created_at"`
+	UpdatedAt time.Time  `json:"updated_at"`
 }
 
 func (u *User) IsAdmin() bool {
