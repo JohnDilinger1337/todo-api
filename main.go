@@ -1,18 +1,17 @@
 package main
 
 import (
+	"main/api"
 	"main/bootstrap"
 	"main/config"
+	"main/controller"
 	"main/docs"
+	"main/repository"
+	"main/service"
 
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
-
-	"main/api"
-	"main/controller"
-	"main/repository"
-	"main/service"
 )
 
 var (
@@ -30,7 +29,7 @@ func main() {
 
 	userRepo = repository.NewUserRepository(db)
 	jwtSvc = service.NewJWTService(cfg.JWTSecret, cfg.AppName, cfg.JWTExpiresAt)
-	authSvc = service.NewAuthService(userRepo, jwtSvc)
+	authSvc = service.NewAuthService(userRepo, jwtSvc, cfg)
 	authCtrl = controller.NewAuthController(authSvc)
 	authAPI = api.NewAuthAPI(authCtrl)
 

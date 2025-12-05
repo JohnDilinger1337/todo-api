@@ -7,9 +7,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var ErrorUnauthorized = gin.H{"error": "unauthorized"}
-var ErrorForbidden = gin.H{"error": "forbidden"}
-var ErrorBadRequest = gin.H{"error": "bad request"}
+var ErrorUnauthorized = gin.H{"message": "Something went wrong while authenticating user!"}
+var ErrorForbidden = gin.H{"message": "forbidden"}
+var ErrorBadRequest = gin.H{"message": "Something went wrong while processing your request!"}
+var ErrorUserAlreadyLoggedIn = gin.H{"message": "user already logged in!"}
+
+var ResponseLoggedIn = gin.H{"message": "Logged in successfully"}
+var ResponseRegistered = gin.H{"message": "Registered successfully! You're now logged in."}
 
 type AuthAPI struct {
 	authController *controller.AuthController
@@ -26,17 +30,17 @@ func NewAuthAPI(authController *controller.AuthController) *AuthAPI {
 // @Accept json
 // @Produce json
 // @Param user body controller.RegisterInput true "User registration info"
-// @Success 201 {object} controller.RegisterResponse
-// @Failure 400 {object} controller.ErrorResponse
+// @Success 201 {object} ResponseRegistered
+// @Failure 400 {object} ErrorBadRequest
 // @Router /auth/register [post]
 func (api *AuthAPI) RegisterRoute(ctx *gin.Context) {
-	token, err := api.authController.Register(ctx)
+	err := api.authController.Register(ctx)
 
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, controller.ErrorResponse{Message: err.Error()})
+		ctx.JSON(http.StatusBadRequest, ErrorBadRequest)
 		return
 	}
-	ctx.JSON(http.StatusCreated, gin.H{"token": token})
+	ctx.JSON(http.StatusCreated, ResponseRegistered)
 }
 
 // LoginRoute godoc
@@ -46,14 +50,21 @@ func (api *AuthAPI) RegisterRoute(ctx *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param user body controller.LoginInput true "User login info"
-// @Success 200 {object} controller.LoginResponse
-// @Failure 400 {object} controller.ErrorResponse
+// @Success 200 {object} ResponseLoggedIn
+// @Failure 400 {object} ErrorUnauthorized
 // @Router /auth/login [post]
 func (api *AuthAPI) LoginRoute(ctx *gin.Context) {
-	token, err := api.authController.Login(ctx)
-	if err != nil {
-		ctx.JSON(http.StatusUnauthorized, controller.ErrorResponse{Message: err.Error()})
+	cookie, _ := ctx.Cookie("token")
+	if cookie != "" {
+		ctx.JSON(http.StatusBadRequest, ErrorUserAlreadyLoggedIn)
 		return
 	}
-	ctx.JSON(http.StatusOK, gin.H{"token": token})
+
+	err := api.authController.Login(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, ErrorUnauthorized)
+		return
+	}
+	// Print Set-Cookie header to verify cookie is set in response
+	ctx.JSON(http.StatusOK, ResponseLoggedIn)
 }
