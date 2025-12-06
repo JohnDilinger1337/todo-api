@@ -34,12 +34,13 @@ func (s *AuthService) Register(username, email, password string) (*model.User, e
 		Password: password, // hashed in repository
 	}
 
-	createdUser, err := s.UserRepo.CreateUser(user)
-	if err != nil {
+	if err := user.SetPassword(user.Password); err != nil {
 		return nil, err
 	}
 
-	return createdUser, nil
+	createdUser, err := s.UserRepo.CreateUser(user)
+
+	return createdUser, err
 }
 
 // Login authenticates and returns a JWT token

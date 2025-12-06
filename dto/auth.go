@@ -26,5 +26,6 @@ const (
 	MsgBadRequest          = "Something went wrong while processing your request!"
 	MsgUserAlreadyLoggedIn = "User already logged in!"
 	MsgRegistered          = "Registered successfully! You're now logged in."
+	MsgUserExists          = "User already exists!"
 	MsgLoggedIn            = "Logged in successfully"
 )

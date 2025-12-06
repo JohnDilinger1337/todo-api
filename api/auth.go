@@ -31,8 +31,16 @@ func (api *AuthAPI) RegisterRoute(ctx *gin.Context) {
 	err := api.authController.Register(ctx)
 
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, dto.ErrorResponse{Message: dto.MsgBadRequest})
-		return
+		if e, ok := err.(*domainErr.DomainError); ok {
+			switch e.Code {
+			case domainErr.ErrUserExistsCode:
+				ctx.JSON(http.StatusBadRequest, dto.ErrorResponse{Message: dto.MsgUserExists})
+				return
+			case domainErr.ErrOther:
+				ctx.JSON(http.StatusBadRequest, dto.ErrorResponse{Message: dto.MsgBadRequest})
+				return
+			}
+		}
 	}
 	ctx.JSON(http.StatusCreated, dto.SuccessMessageResponse{Message: dto.MsgRegistered})
 }
