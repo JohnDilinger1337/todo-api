@@ -1,14 +1,10 @@
 package service
 
 import (
-	"time"
-
 	"main/config"
 	"main/database/model"
 	domainErr "main/domain/error"
 	"main/repository"
-
-	"github.com/gin-gonic/gin"
 )
 
 type AuthService struct {
@@ -17,11 +13,10 @@ type AuthService struct {
 	Cfg        *config.Config
 }
 
-func NewAuthService(userRepo *repository.UserRepository, jwtService *JWTService, cfg *config.Config) *AuthService {
+func NewAuthService(userRepo *repository.UserRepository, jwtService *JWTService) *AuthService {
 	return &AuthService{
 		UserRepo:   userRepo,
 		JWTService: jwtService,
-		Cfg:        cfg,
 	}
 }
 
@@ -44,36 +39,21 @@ func (s *AuthService) Register(username, email, password string) (*model.User, e
 }
 
 // Login authenticates and returns a JWT token
-func (s *AuthService) Login(username, password string, c *gin.Context) error {
+func (s *AuthService) Login(username, password string) (string, error) {
 	var user model.User
 	if err := s.UserRepo.DB.Where("username = ?", username).First(&user).Error; err != nil {
-		return domainErr.New(domainErr.ErrUserNotFoundCode)
+		return "", domainErr.New(domainErr.ErrUserNotFoundCode)
 	}
 
 	if !user.CheckPassword(password) {
-		return domainErr.New(domainErr.ErrInvalidPasswordCode)
+		return "", domainErr.New(domainErr.ErrInvalidPasswordCode)
 	}
 
 	token, err := s.JWTService.GenerateToken(user.ID, user.IsAdmin())
 	if err != nil {
-		return domainErr.New(domainErr.ErrTokenGenerationCode)
+		return "", domainErr.New(domainErr.ErrTokenGenerationCode)
 	}
 
-	duration, err := time.ParseDuration(s.Cfg.JWTExpiresAt)
-	if err != nil {
-		return domainErr.New(domainErr.ErrOther)
-	}
-
-	c.SetCookie(
-		"token",                    // name
-		token,                      // value (JWT token string)
-		int(duration.Seconds()),    // max age in seconds (e.g., 1 hour)
-		"/",                        // path
-		"",                         // domain ("" means current domain)
-		s.Cfg.GinMode == "release", // secure (only send over HTTPS)
-		true,                       // httpOnly (not accessible via JS)
-	)
-
-	return nil
+	return token, nil
 
 }
