@@ -1,16 +1,15 @@
 package service
 
 import (
-	"main/config"
 	"main/database/model"
 	domainErr "main/domain/error"
+	"main/dto"
 	"main/repository"
 )
 
 type AuthService struct {
 	UserRepo   *repository.UserRepository
 	JWTService *JWTService
-	Cfg        *config.Config
 }
 
 func NewAuthService(userRepo *repository.UserRepository, jwtService *JWTService) *AuthService {
@@ -21,12 +20,12 @@ func NewAuthService(userRepo *repository.UserRepository, jwtService *JWTService)
 }
 
 // Register a new user
-func (s *AuthService) Register(username, email, password string) (*model.User, error) {
+func (s *AuthService) Register(input *dto.RegisterInput) (*model.User, error) {
 	user := &model.User{
-		Username: username,
-		Email:    email,
+		Username: input.Username,
+		Email:    input.Email,
 		Role:     model.RoleUser,
-		Password: password, // hashed in repository
+		Password: input.Password, // hashed in repository
 	}
 
 	if err := user.SetPassword(user.Password); err != nil {
@@ -39,13 +38,13 @@ func (s *AuthService) Register(username, email, password string) (*model.User, e
 }
 
 // Login authenticates and returns a JWT token
-func (s *AuthService) Login(username, password string) (string, error) {
+func (s *AuthService) Login(input *dto.LoginInput) (string, error) {
 	var user model.User
-	if err := s.UserRepo.DB.Where("username = ?", username).First(&user).Error; err != nil {
+	if err := s.UserRepo.DB.Where("username = ?", input.Username).First(&user).Error; err != nil {
 		return "", domainErr.New(domainErr.ErrUserNotFoundCode)
 	}
 
-	if !user.CheckPassword(password) {
+	if !user.CheckPassword(input.Password) {
 		return "", domainErr.New(domainErr.ErrInvalidPasswordCode)
 	}
 

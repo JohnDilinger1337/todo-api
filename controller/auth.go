@@ -26,13 +26,18 @@ func (c *AuthController) Register(ctx *gin.Context) error {
 		return err
 	}
 
-	user, err := c.AuthService.Register(input.Username, input.Email, input.Password)
+	user, err := c.AuthService.Register(&input)
 
 	if err != nil {
 		return err
 	}
 
-	token, err := c.AuthService.Login(user.Username, user.Password)
+	dtoLogin := &dto.LoginInput{
+		Username: user.Username,
+		Password: user.Password,
+	}
+
+	token, err := c.AuthService.Login(dtoLogin)
 	if err != nil {
 		return err
 	}
@@ -61,7 +66,7 @@ func (c *AuthController) Login(ctx *gin.Context) error {
 		return err
 	}
 
-	token, err := c.AuthService.Login(input.Username, input.Password)
+	token, err := c.AuthService.Login(&input)
 	if err != nil {
 		return err
 	}
