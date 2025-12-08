@@ -7,7 +7,7 @@ import (
 	"main/controller"
 	"main/docs"
 
-	"main/middleware"
+	// "main/middleware"
 	"main/repository"
 	"main/service"
 
@@ -18,11 +18,17 @@ import (
 
 var (
 	userRepo *repository.UserRepository
-	jwtSvc   *service.JWTService
-	authSvc  *service.AuthService
+	todoRepo *repository.TodoRepository
+
+	jwtSvc  *service.JWTService
+	authSvc *service.AuthService
+	todoSvc *service.TodoService
 
 	authCtrl *controller.AuthController
-	authAPI  *api.AuthAPI
+	todoCtrl *controller.TodoController
+
+	authAPI *api.AuthAPI
+	todoAPI *api.TodoAPI
 )
 
 func main() {
@@ -30,10 +36,17 @@ func main() {
 	db, err := bootstrap.InitializeApp(cfg)
 
 	userRepo = repository.NewUserRepository(db)
+	todoRepo = repository.NewTodoRepository(db)
+
 	jwtSvc = service.NewJWTService(cfg.JWTSecret, cfg.AppName, cfg.JWTExpiresAt)
 	authSvc = service.NewAuthService(userRepo, jwtSvc)
+	todoSvc = service.NewTodoService(todoRepo)
+
 	authCtrl = controller.NewAuthController(authSvc, cfg)
+	todoCtrl = controller.NewTodoController(todoSvc)
+
 	authAPI = api.NewAuthAPI(authCtrl)
+	todoAPI = api.NewTodoAPI(todoCtrl)
 
 	gin.SetMode(cfg.GinMode)
 
@@ -50,7 +63,7 @@ func main() {
 
 	server := gin.Default()
 
-	server.Use(middleware.JWTMiddleware(jwtSvc))
+	// server.Use(middleware.JWTMiddleware(jwtSvc))
 
 	if cfg.GinMode != "release" {
 		server.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
